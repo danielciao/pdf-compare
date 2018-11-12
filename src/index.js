@@ -15,8 +15,15 @@ function convert(source) {
     pdfParser.on('pdfParser_dataError', ({ parserError }) => reject(parserError));
     pdfParser.on('pdfParser_dataReady', data => resolve(data));
 
-    pdfParser.loadPDF(`./src/${source}.pdf`);
+    pdfParser.loadPDF(`./data/${source}.pdf`);
   });
+}
+
+function writeToFile(fileName) {
+  return data => {
+    console.log(data.length);
+    fs.writeFile(`./${fileName}.json`, JSON.stringify(data, null, 2));
+  };
 }
 
 function groupBy(target, start, end, fn) {
@@ -52,7 +59,7 @@ function processPage({ HLines, Texts }) {
     .filter(line => Object.keys(line).length > 0);
 }
 
-function processFile({ formImage: { Pages: pages } }) {
+function processData({ formImage: { Pages: pages } }) {
   let previousPage = [];
 
   return pages.reduce((result, data) => {
@@ -70,6 +77,7 @@ function processFile({ formImage: { Pages: pages } }) {
   }, []);
 }
 
-convert('test2')
-  .then(file => console.log(processFile(file)))
+convert('2018-10-24-Tier-2_5-Register-of-Sponsors')
+  .then(processData)
+  .then(writeToFile('test'))
   .catch(err => console.error(err));
